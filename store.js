@@ -2,7 +2,7 @@ import {createStore, applyMiddleware, combineReducers, compose} from 'redux';
 import thunk from 'redux-thunk';
 import {composeWithDevTools} from 'redux-devtools-extension/developmentOnly';
 import {persistStore, persistReducer} from 'redux-persist';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 //Bring in components
 import loginSlice from './Reducers/loginSlice';
@@ -10,7 +10,7 @@ import lockSlice from './Reducers/lockSlice';
 
 const persistConfig = {
   key: 'root',
-  storage: AsyncStorage,
+  storage: EncryptedStorage,
 };
 
 const reducer = combineReducers({
