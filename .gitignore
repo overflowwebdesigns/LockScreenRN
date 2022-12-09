@@ -62,5 +62,7 @@ buck-out/
 # Ruby / CocoaPods
 /ios/Pods/
 /vendor/bundle/
-/ios/myBuild/
-/ios/myBuild
+myBuild/
+myBuild
+/myBuild/
+/myBuild
