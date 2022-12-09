@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {showMessage} from 'react-native-flash-message';
