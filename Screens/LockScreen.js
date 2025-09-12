@@ -6,7 +6,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import {showMessage} from 'react-native-flash-message';
 import {Button, Input} from 'react-native-elements';
 import {unlock} from '../Reducers/lockSlice';
-import {SafeAreaView} from 'react-navigation';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const LockScreen = ({navigation}) => {
   const [pin, setPin] = useState(null);

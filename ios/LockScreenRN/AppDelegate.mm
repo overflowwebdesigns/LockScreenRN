@@ -5,6 +5,7 @@
 #import <React/RCTRootView.h>
 
 #import <React/RCTAppSetupUtils.h>
+#import <TrustKit/TrustKit.h>
 
 #if RCT_NEW_ARCH_ENABLED
 #import <React/CoreModulesPlugins.h>
@@ -31,6 +32,50 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  // Configure TrustKit for certificate pinning with enhanced security
+  NSDictionary *trustKitConfig = @{
+    // CRITICAL: Enable network delegate swizzling to intercept React Native network calls
+    kTSKSwizzleNetworkDelegates: @YES,
+    
+    kTSKPinnedDomains: @{
+      @"lock-screen-backend.overflowhosting.tech": @{
+        // Enforce certificate pinning (block connections on failure)
+        kTSKEnforcePinning: @YES,
+        
+        // Don't include subdomains
+        kTSKIncludeSubdomains: @NO,
+        
+        // Public key hashes for certificate pinning
+        kTSKPublicKeyHashes: @[
+          @"x8dhkklTSAOrXliSIfkfdWc+BYLO/hkQNYrd/H9egQg=", // Current leaf certificate public key
+          @"AlSQhgtJirc8ahLyekmtX+Iw+v46yPYRLJt9Cq1GlB0=", // Current intermediate certificate public key (backup)
+        ],
+        
+        // Disable certificate transparency validation for Let's Encrypt
+        kTSKDisableDefaultReportUri: @YES,
+        
+        // Custom report URI (optional)
+        kTSKReportUris: @[@"https://lock-screen-backend.overflowhosting.tech/trustkit-report"]
+      }
+    }
+  };
+  
+  NSLog(@"🔒 Initializing TrustKit with network delegate swizzling ENABLED");
+  NSLog(@"🔒 Target domain: lock-screen-backend.overflowhosting.tech");
+  NSLog(@"🔒 Certificate hashes: %@", trustKitConfig[kTSKPinnedDomains][@"lock-screen-backend.overflowhosting.tech"][kTSKPublicKeyHashes]);
+  
+  [TrustKit initSharedInstanceWithConfiguration:trustKitConfig];
+  
+  // Verify TrustKit initialization
+  if ([TrustKit sharedInstance]) {
+    NSLog(@"✅ TrustKit successfully initialized and ready to intercept network calls");
+    NSLog(@"🔒 Certificate pinning is now ACTIVE for lock-screen-backend.overflowhosting.tech");
+    NSLog(@"🚨 MITM attacks should now be BLOCKED");
+  } else {
+    NSLog(@"❌ TrustKit initialization FAILED - Certificate pinning NOT active");
+  }
+  
+
   RCTAppSetupPrepareApp(application);
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];

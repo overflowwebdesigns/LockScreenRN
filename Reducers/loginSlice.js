@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import axios from 'axios';
+import SecureHttpClient from '../src/services/SecureHttpClient';
 
 // initial state
 const initialState = {
@@ -52,24 +52,27 @@ export const selectUser = state => state.userLogin;
 // export the default reducer
 export default loginSlice.reducer;
 
-// set up axios - simple json-server prototype config here
-const api = axios.create({
-  baseURL: 'http://lock-screen-backend.overflowhosting.tech/',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// fetch all items
+// Login request using secure HTTP client with certificate pinning
 export function loginRequest(email, password) {
   return async dispatch => {
-    api
-      .post('/api/users/login', {email: email, password: password})
-      .then(response => {
-        dispatch(fulfilled(response.data));
-      })
-      .catch(error => {
-        dispatch(rejected());
+    try {
+      dispatch(pending());
+      
+      const response = await SecureHttpClient.post('/api/users/login', {
+        email: email,
+        password: password,
       });
+      
+      dispatch(fulfilled(response));
+    } catch (error) {
+      console.error('Login request failed:', error);
+      
+      // Handle certificate pinning failures
+      if (error.message && error.message.includes('Certificate validation failed')) {
+        dispatch(rejected('Security error: Connection may be compromised'));
+      } else {
+        dispatch(rejected());
+      }
+    }
   };
 }
